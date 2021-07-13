@@ -15,7 +15,7 @@ import os
 import socket
 import sys
 
-# import horovod.tensorflow as hvd
+import horovod.tensorflow as hvd
 
 from tensorpack import *
 from tensorpack.tfutils import SmartInit
@@ -57,8 +57,7 @@ def create_eval_callback(name, tower_func, condition):
 
 def do_train(model):
     batch = args.batch
-##    total_batch = batch * hvd.size()
-    total_batch = batch
+    total_batch = batch * hvd.size()
 
     if args.fake:
         data = FakeData(
@@ -68,7 +67,7 @@ def do_train(model):
         callbacks = []
         steps_per_epoch = 50
     else:
-##        logger.info("#Tower: {}; Batch size per tower: {}".format(hvd.size(), batch))
+        logger.info("#Tower: {}; Batch size per tower: {}".format(hvd.size(), batch))
         zmq_addr = 'ipc://@imagenet-train-b{}'.format(batch)
         if args.no_zmq_ops:
             dataflow = RemoteDataZMQ(zmq_addr, hwm=150, bind=False)
@@ -208,7 +207,7 @@ if __name__ == '__main__':
     model.image_shape = args.input_size
 
     os.system("nvidia-smi")
-    # hvd.init()
+    hvd.init()
 
     if args.eval:
         sessinit = SmartInit(args.load)
