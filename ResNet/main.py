@@ -57,7 +57,8 @@ def create_eval_callback(name, tower_func, condition):
 
 def do_train(model):
     batch = args.batch
-    total_batch = batch * hvd.size()
+##    total_batch = batch * hvd.size()
+    total_batch = batch
 
     if args.fake:
         data = FakeData(
@@ -67,7 +68,7 @@ def do_train(model):
         callbacks = []
         steps_per_epoch = 50
     else:
-        logger.info("#Tower: {}; Batch size per tower: {}".format(hvd.size(), batch))
+##        logger.info("#Tower: {}; Batch size per tower: {}".format(hvd.size(), batch))
         zmq_addr = 'ipc://@imagenet-train-b{}'.format(batch)
         if args.no_zmq_ops:
             dataflow = RemoteDataZMQ(zmq_addr, hwm=150, bind=False)
@@ -250,7 +251,7 @@ if __name__ == '__main__':
         launch_train_with_config(config, trainer)
 
     elif args.eval_directory:
-        assert hvd.size() == 1
+##        assert hvd.size() == 1
         files = glob.glob(os.path.join(args.eval_directory, '*.*'))
         ds = ImageFromFile(files)
         # Our model expects BGR images instead of RGB.
@@ -283,14 +284,16 @@ if __name__ == '__main__':
         logdir = os.path.join(
             'train_log',
             'PGD-{}{}-Batch{}-{}GPUs-iter{}-epsilon{}-step{}{}'.format(
-                args.arch, args.depth, args.batch, hvd.size(),
+##                args.arch, args.depth, args.batch, hvd.size(),
+                args.arch, args.depth, args.batch, 1,
                 args.attack_iter, args.attack_epsilon, args.attack_step_size,
                 '-' + args.logdir if args.logdir else ''))
 
-        if hvd.rank() == 0:
+##        if hvd.rank() == 0:
+        if True:
             # old log directory will be automatically removed.
             logger.set_logger_dir(logdir, 'd')
         logger.info("CMD: " + " ".join(sys.argv))
-        logger.info("Rank={}, Local Rank={}, Size={}".format(hvd.rank(), hvd.local_rank(), hvd.size()))
+##        logger.info("Rank={}, Local Rank={}, Size={}".format(hvd.rank(), hvd.local_rank(), hvd.size()))
 
         do_train(model)

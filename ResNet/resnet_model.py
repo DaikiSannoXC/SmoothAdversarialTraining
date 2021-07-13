@@ -96,7 +96,7 @@ def BNActivation(x, activation_name='relu', name=None):
     x = BatchNorm('bn', x)
 
     activation_fn = activation_list[activation_name]
-    x = activation_fn(x, name=name)
+    x = activation_fn(x)
     return x
 
 
@@ -165,7 +165,7 @@ def resnet_bottleneck(l, ch_out, stride, group=1, res2_bottleneck=64, activation
     """
     ret = l + resnet_shortcut(shortcut, ch_out * 4, stride, activation=get_bn(zero_init=False))
     activation_fn = activation_list[activation_name]
-    return activation_fn(ret, name='block_output')
+    return activation_fn(ret)
     # return tf.nn.swish(ret, name='block_output')
 
 
